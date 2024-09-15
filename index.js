@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const express = require('express');
 const app = express();
 app.use(express.json());
@@ -15,19 +16,26 @@ const genres = [
     {id:11, name:"Fiction"},
     {id:12, name:"Silent"},
 ];
-app.get('/vidly.com/api/genres',(req,res)=>{
+app.get('/api/genres',(req,res)=>{
     res.send(genres);
 });
-app.get('/vidly.com/api/genres/:id',(req,res)=>{
-    const genre = genres.find(g=>g.id === parseInt(genre.params.id));
+app.get('/api/genres/:id',(req,res)=>{
+    const genre = genres.find(g=>g.id === parseInt(req.params.id));
     if(!genre){
         res.status(400).send('Genre was not found!');
         return;
     };
     res.send(genre);
 });
-app.post('/vidly.com/api/genres/:id',(req,res)=>{
-
+app.post('/api/genres',(req,res)=>{
+    const schema =Joi.object({
+        name : Joi.string().required()
+    });
+    const result = schema.validate(req.body);
+    if(result.error){
+        res.status(400).send('is not valid');
+        return;
+    };
     const genre ={
         id: genres.length+1,
         name: req.body.name
@@ -35,17 +43,25 @@ app.post('/vidly.com/api/genres/:id',(req,res)=>{
     genres.push(genre);
     res.send(genre);
 });
-app.put('/vidly.com/api/genres/:id',(req,res)=>{
-    const genre = genres.find(g=>g.id === parseInt(genre.params.id));
+app.put('/api/genres/:id',(req,res)=>{
+    const genre = genres.find(g=>g.id === parseInt(req.params.id));
     if(!genre){
         res.status(400).send('Genre was not found!');
+        return;
+    };
+    const schema =Joi.object({
+       name : Joi.string().required()
+    });
+    const result = schema.validate(req.body);
+    if(result.error){
+        res.status(400).send('is not valid');
         return;
     };
     genre.name = req.body.name;
     res.send(genre);
 });
-app.delete('/vidly.com/api/genres/:id',(req,res)=>{
-    const genre = genres.find(g=>g.id === parseInt(genre.params.id));
+app.delete('/api/genres/:id',(req,res)=>{
+    const genre = genres.find(g=>g.id === parseInt(req.params.id));
     if(!genre){
         res.status(400).send('Genre was not found!');
         return;
